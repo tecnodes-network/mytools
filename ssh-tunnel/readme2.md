@@ -25,19 +25,51 @@ SSH Tunnel Manager Pro allows users to create, manage, and monitor multiple SSH 
 - **Windows API**: `subprocess.CREATE_NO_WINDOW` for background processes
 
 ### Dependencies
+
 ```txt
 customtkinter>=5.2.0
 pystray>=0.19.0
 Pillow>=9.0.0
 pyinstaller>=5.0
-System Requirements
-OS: Windows 10/11 (64-bit)
-SSH Client: OpenSSH (built into Windows 10/11) or PuTTY/plink
-Privileges: Standard user (no admin required for ports > 1024)
-Installation
-Method 1: Pre-built Executable
-Download TunnelManager.exe from releases
-Place in desired directory (e.g., C:\Tools\TunnelManager\)
+```
+
+### System Requirements
+- **OS**: Windows 10/11 (64-bit)
+- **SSH Client**: OpenSSH (built into Windows 10/11) or PuTTY/plink
+- **Privileges**: Standard user (no admin required for ports > 1024)
+
+## Installation
+
+### Method 1: Pre-built Executable
+1. Download TunnelManager.exe from releases
+2. Place in desired directory (e.g., C:\Tools\TunnelManager\)
+3. Run TunnelManager.exe
+4. First Run: Creates tunnel_profiles.json in same directory
+
+### Method 2: From Source
+```bash
+# Clone repository
+git clone <repo-url>
+cd ssh-tunnel-manager
+
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run application
+python tunnel_manager.py
+```
+
+## Building Executable
+```bash
+# Build script (build.bat)
+pyinstaller --noconfirm --onefile --windowed --name "TunnelManager" --clean tunnel_manager.py
+
+# Output: dist/TunnelManager.exe
+```
 Run TunnelManager.exe
 First Run: Creates tunnel_profiles.json in same directory
 Method 2: From Source
@@ -65,13 +97,13 @@ pyinstaller --noconfirm --onefile --windowed --name "TunnelManager" --clean tunn
 # Output: dist/TunnelManager.exe
 Architecture
 Class Structure
-plain
-Copy
+```
 App (Main Application)
 ├── Settings (Configuration management)
 ├── TunnelManager (Profile management)
 │   └── SSHTunnel (Individual connection handler)
 └── ProfileDialog (UI for add/edit)
+```
 Key Components
 1. SSHTunnel Class
 Handles individual SSH connections:
@@ -90,8 +122,8 @@ Auto-path Detection: Uses sys.frozen to detect exe vs script mode
 Migration: Handles config file relocation
 Configuration File Format
 Location: tunnel_profiles.json (or user-defined path)
-JSON
-Copy
+#### Example JSON
+```json
 [
   {
     "name": "Production MySQL",
@@ -113,19 +145,20 @@ Copy
     ]
   }
 ]
+```
 UI Layout Structure
-plain
-Copy
+```
 Root Window
 ├── Sidebar (250px fixed)
 │   ├── Title
 │   ├── Action Buttons (Add, Start All, Stop All)
 │   └── Settings
 └── Main Content (flexible)
-    ├── Stats Header (3 cards)
-    ├── Scrollable Profile List
-    ├── Draggable Sash (6px height)
-    └── Activity Log (resizable)
+  ├── Stats Header (3 cards)
+  ├── Scrollable Profile List
+  ├── Draggable Sash (6px height)
+  └── Activity Log (resizable)
+```
 Usage Guide
 Creating a Profile
 Click "+ Add Profile"
@@ -157,10 +190,10 @@ Troubleshooting
 "Access Denied" During Build
 Cause: TunnelManager.exe is running
 Fix:
-cmd
-Copy
+```cmd
 taskkill /F /IM TunnelManager.exe
 # Or check system tray for minimized app
+```
 Connection Shows "Connected" But Port Not Working
 Possible Causes:
 Key Authentication Failed: Check SSH key path and permissions
@@ -178,11 +211,11 @@ Add ConnectTimeout=10 to SSH options (already in code)
 "SSH Tunnel object has no attribute is_running"
 Cause: Outdated compiled version
 Fix: Clean rebuild
-cmd
-Copy
+```cmd
 rmdir /s /q dist build
 del TunnelManager.spec
 pyinstaller --noconfirm --onefile --windowed --name "TunnelManager" tunnel_manager.py
+```
 Profile Data Lost
 Check:
 Config file path in Settings
@@ -192,15 +225,15 @@ Development Guide
 Adding New Features
 1. Adding SSH Options
 Edit SSHTunnel.start() method:
-Python
-Copy
+```python
 cmd = [
-    'ssh',
-    '-p', str(self.profile.get('ssh_port', 22)),
-    '-i', os.path.expanduser(self.profile['key']),
-    '-o', 'NewOption=value',  # Add here
-    # ...
+  'ssh',
+  '-p', str(self.profile.get('ssh_port', 22)),
+  '-i', os.path.expanduser(self.profile['key']),
+  '-o', 'NewOption=value',  # Add here
+  # ...
 ]
+```
 2. Adding UI Elements
 Use ctk.CTkFrame for containers
 Use grid() or pack() consistently (current code uses mixed)
@@ -210,9 +243,9 @@ Update ProfileDialog.__init__() to add input field
 Update ProfileDialog.save() to include in profile dict
 Update SSHTunnel to use the new field
 Migration: Handle missing keys in existing profiles:
-Python
-Copy
+```python
 value = profile.get('new_field', 'default_value')
+```
 Threading Considerations
 SSH Operations: Run in daemon threads to prevent UI freeze
 UI Updates: Must use self.root.after() for thread-safe GUI updates
@@ -227,8 +260,7 @@ Remove creationflags parameter
 Use os.kill() instead of taskkill
 Use os.path.expanduser('~/.config') instead of APPDATA
 File Structure
-plain
-Copy
+```
 project/
 ├── tunnel_manager.py      # Main application (single file)
 ├── build.bat              # Windows build script
@@ -236,15 +268,16 @@ project/
 ├── tunnel_profiles.json   # User data (generated)
 ├── settings.json          # App settings (in APPDATA)
 └── dist/
-    └── TunnelManager.exe  # Compiled executable
+  └── TunnelManager.exe  # Compiled executable
+```
 Security Considerations
 SSH Keys: Store keys with restricted permissions (600)
 Config File: tunnel_profiles.json contains connection details (no passwords, but host info)
 StrictHostKeyChecking: Currently disabled (-o StrictHostKeyChecking=no) for ease of use. Enable for production:
-Python
-Copy
+```python
 # Remove this line from cmd in SSHTunnel.start()
 '-o', 'StrictHostKeyChecking=no',
+```
 Known Limitations
 No Password Authentication: Only SSH key-based auth supported
 Windows Only: Uses Windows-specific subprocess flags
@@ -252,13 +285,13 @@ No Auto-Reconnect: Tunnels don't auto-restart on disconnect (could be added in _
 Single Instance: Running multiple copies may cause port conflicts
 Future Enhancements
 Potential improvements for new developers:
-[ ] Auto-reconnect with exponential backoff
-[ ] Password authentication support (with secure storage)
-[ ] Import/export profiles
-[ ] System tray minimization (pystray integration stub exists)
-[ ] Connection statistics (bytes transferred)
-[ ] Linux/Mac support
-[ ] Dark/Light theme toggle
+* [ ] Auto-reconnect with exponential backoff
+* [ ] Password authentication support (with secure storage)
+* [ ] Import/export profiles
+* [ ] System tray minimization (pystray integration stub exists)
+* [ ] Connection statistics (bytes transferred)
+* [ ] Linux/Mac support
+* [ ] Dark/Light theme toggle
 License
 [Your License Here]
 Support
