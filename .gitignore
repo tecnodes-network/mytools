@@ -1,0 +1,27 @@
+# Python virtual environment
+.venv/
+
+# PyInstaller build files
+build/
+
+*.spec
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+*.dll
+*.dylib
+
+# Other common ignores
+*.log
+*.tmp
+*.swp
+*.bak
+
+# VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

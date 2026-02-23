@@ -1,0 +1,16 @@
+[
+  {
+    "name": "H15-Mysql",
+    "host": "167.235.33.106",
+    "ssh_port": 1221,
+    "user": "akhan",
+    "key": "C:/Users/saeed/.ssh/id_tunnel",
+    "forwards": [
+      {
+        "local": "3306",
+        "remote": "3306",
+        "remote_host": "localhost"
+      }
+    ]
+  }
+]
